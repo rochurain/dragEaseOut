@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>简单拖拽</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .box1 {
+            width: 200px;
+            height: 400px;
+            background-color: pink;
+            position: absolute;
+            /*margin-left:30px;*/
+            cursor: move;
+        }
+
+        .box2 {
+            width: 200px;
+            height: 100px;
+            background-color: purple;
+        }
+    </style>
+    <script src="common.js"></script>
+    <script>
+        //$$:实现盒子跟随鼠标移动,且鼠标移动抬起,缓动让盒子停下来
+        //1:思路:先让盒子跟随鼠标在页面移动
+        //2.当鼠标抬起的时候,让盒子的位置缓慢变化到一个位置
+        //3.这个位置实现的过程:盒子最终的位置等于盒子的位置加上一个定时内
+        //一个数字缓慢减少的值,当这个数值减小到某个范围,停止运动,即清除定时器
+
+        //4.这个慢慢减小的数字跟什么有关呢,我们要实现的效果是,鼠标加速移动抬起的时候
+        //盒子位置会远一点才会停下来,鼠标缓慢移动抬起的时候,盒子走的很近停下来.
+        //5.鼠标每次移动的时候都会有坐标值,移动越快的话,当前的移动的坐标值减去上次的移动坐标值越大
+        //把这个差值放在定时器让盒子的距离加上这个差值缓慢减小,后停下来.
+
+
+
+        //$$$步骤1.让盒子跟随鼠标移动
+        //2.鼠标抬起,设置定时器,缓动停下来
+
+
+
+
+
+        window.onload = function () {
+
+            //1.获取操作对象
+            var box1 = document.querySelector ( ".box1" )
+            var box2 = document.querySelector ( ".box2" )
+
+
+            //2.对事件源注册鼠标down事件
+            box1.onmousedown = function ( e ) {
+                e = e || window.event
+                var X = page ( e ).pageX - box1.offsetLeft
+                var Y = page ( e ).pageY - box1.offsetTop
+
+                //第一次的鼠标坐标值,是当鼠标点击的时候获取的.
+                var lastX = page ( e ).pageX
+                var lastY = page ( e ).pageY
+
+                //3.注册页面移动事件
+                document.onmousemove = function ( ev ) {
+                    ev = ev || window.event
+                    box1.style.left = page ( ev ).pageX - X + "px"
+                    box1.style.top = page ( ev ).pageY - Y + "px"
+
+
+                    //第二次的鼠标坐标值,是当鼠标第一次移动的时候获取的.
+                    var nowX = page ( ev ).pageX
+                    var nowY = page ( ev ).pageY
+
+
+                    //获取鼠标移动的坐标差值,就是让后面的移动坐标值减去上一次移动的
+                    //   第一次相减由于第一次没有移动,所以减去点击的坐标值.滑动越快,差值越大
+
+                    var minusX = nowX - lastX
+                    var minusY = nowY - lastY
+
+                    // 减去后.让移动的值赋值给上一次的坐标值,再去产生下一次的移动坐标值
+                    lastX = nowX
+                    lastY = nowY
+
+
+                    //4.鼠标抬起,设置定时器,让盒子缓慢停下来
+                    document.onmouseup = function ( e ) {
+                        e = e || window.event
+                        //当鼠标抬起来的时候记得清除页面移动事件
+                        document.onmousemove = null
+
+                        //设置定时器,让盒子的位置缓慢到达一个新的位置
+                        var timeID = setInterval ( function () {
+
+                            //让相减的差值每次定时一次都减小
+                            minusX *= 0.866
+                            minusY *= 0.866
+                            box1.style.left = box1.offsetLeft + minusX + "px"
+                            box1.style.top = box1.offsetTop + minusY + "px"
+
+                            //判断,当差值小于某个数值的时候,定时器清除,绝对值小于的越小
+                            // 越灵敏,之所以是绝对值,因为差值可能是负数,差值越大,要用好大的速度
+                            //才能看出效果
+                            if ( Math.abs ( minusX) < 0.1|| Math.abs ( minusY ) < 0.1 ) {
+                                clearInterval ( timeID )
+                            }
+                        }, 10 )
+                    }
+                }
+            }
+
+        }
+
+    </script>
+</head>
+<body>
+<div class="box1">
+    <div class="box2"></div>
+</div>
+</body>
+</html>
+<script>
+
+</script>
